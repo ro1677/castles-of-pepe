@@ -41,7 +41,7 @@ export default function Home() {
   };
 
   return (
-    // pt-16로 네비게이션 바 높이만큼 상단 여백을 주고, 전체 여백을 줄였습니다.
+    // 상단 네비게이션 바 높이만큼 여백(pt-16) 부여
     <div className="bg-backgroundGray min-h-screen pt-16">
       {/* 네비게이션 바 */}
       <Navbar setActiveSection={setActiveSection} toggleLanguage={toggleLanguage} language={language} />

@@ -5,7 +5,8 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function PresaleForm({ selectedLanguage }) {
-  const [amount, setAmount] = useState(1);
+  // 수량 초기값은 빈 문자열로 설정하여 placeholder가 보이도록 함
+  const [amount, setAmount] = useState("");
   const [solPrice, setSolPrice] = useState(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,9 @@ export default function PresaleForm({ selectedLanguage }) {
 
   const { publicKey, connected, connect, signTransaction } = useWallet();
   const { setVisible } = useWalletModal();
+
+  // 입력값을 정수로 파싱 (빈 문자열이면 0으로 처리)
+  const numericAmount = parseInt(amount) || 0;
 
   // ✅ SOL 시세 가져오기 (네트워크 오류 시 기본값 150,000 KRW 사용)
   useEffect(() => {
@@ -69,8 +73,8 @@ export default function PresaleForm({ selectedLanguage }) {
   const SOL_PRICE_KRW = solPrice || 150000;
   const TOKEN_PRICE_KRW = 5;
   const TOKEN_PRICE_SOL = TOKEN_PRICE_KRW / SOL_PRICE_KRW;
-  const totalCostSOL = (amount * TOKEN_PRICE_SOL).toFixed(6);
-  const totalCostKRW = amount * TOKEN_PRICE_KRW;
+  const totalCostSOL = (numericAmount * TOKEN_PRICE_SOL).toFixed(6);
+  const totalCostKRW = numericAmount * TOKEN_PRICE_KRW;
 
   // ✅ 지갑 결제 함수
   const handlePurchase = async () => {
@@ -81,7 +85,7 @@ export default function PresaleForm({ selectedLanguage }) {
       alert(selectedLanguage === "ko" ? "❌ 지갑이 연결되지 않았습니다." : "❌ Wallet is not connected.");
       return;
     }
-    if (amount <= 0) {
+    if (numericAmount <= 0) {
       alert(selectedLanguage === "ko" ? "❌ 구매할 토큰 수량을 올바르게 입력하세요." : "❌ Please enter a valid token amount.");
       return;
     }
@@ -95,7 +99,7 @@ export default function PresaleForm({ selectedLanguage }) {
     }
     setLoading(true);
     try {
-      const txHash = await purchasePresaleToken({ publicKey, signTransaction }, amount, TOKEN_PRICE_SOL);
+      const txHash = await purchasePresaleToken({ publicKey, signTransaction }, numericAmount, TOKEN_PRICE_SOL);
       alert(
         selectedLanguage === "ko"
           ? `✅ 프리세일 구매 완료! 트랜잭션 해시: ${txHash}`
@@ -158,15 +162,17 @@ export default function PresaleForm({ selectedLanguage }) {
         {selectedLanguage === "ko" ? "☕ 캣프레소 프리세일" : "☕ Catpresso Presale"}
       </h2>
 
-      {/* 프리세일 남은 시간 및 판매량 */}
+      {/* 작은 박스: 프리세일 남은 시간만 (글자 크기를 키움) */}
       <div className="bg-gray-800 p-3 rounded-lg mb-4 text-center">
-        <p className="text-yellow-300">
+        <p className="text-xl text-yellow-300">
           📅 {selectedLanguage === "ko" ? "프리세일 남은 시간" : "Presale Remaining Time"}: {remainingTime}
         </p>
-        <p className="text-yellow-300">
-          {selectedLanguage === "ko" ? "🎯 목표 판매토큰" : "🎯 Target Sale"}: {salesData.current.toLocaleString()} / {salesData.goal.toLocaleString()} {selectedLanguage === "ko" ? "토큰" : "tokens"}
-        </p>
       </div>
+
+      {/* 목표 판매토큰 정보: 흰색 텍스트, "토큰" 대신 "(CATP)" */}
+      <p className="text-center text-white mb-4">
+        {selectedLanguage === "ko" ? "🎯 목표 판매토큰" : "🎯 Target Sale"}: {salesData.current.toLocaleString()} / {salesData.goal.toLocaleString()} {selectedLanguage === "ko" ? "(CATP)" : "(CATP)"}
+      </p>
 
       <p className="text-center text-gray-300 mb-4">
         {selectedLanguage === "ko" ? "현재 SOL 시세" : "Current SOL Price"}:{" "}
@@ -178,10 +184,10 @@ export default function PresaleForm({ selectedLanguage }) {
 
       <input
         type="number"
-        placeholder={selectedLanguage === "ko" ? "구매할 토큰 개수" : "Enter token amount"}
+        placeholder={selectedLanguage === "ko" ? "구매하실 수량을 입력하세요." : "Enter token quantity"}
         className="w-full p-2 border rounded mb-3 text-black"
         value={amount}
-        onChange={(e) => setAmount(parseInt(e.target.value) || 1)}
+        onChange={(e) => setAmount(e.target.value)}
         min={1}
       />
 
@@ -209,15 +215,14 @@ export default function PresaleForm({ selectedLanguage }) {
       </p>
       <button
         onClick={handlePurchase}
-        className={`w-full text-black font-bold py-3 rounded-lg ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-white hover:bg-gray-200"}`}
+        className={`w-full text-black font-bold py-3 mt-4 rounded-lg ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-white hover:bg-gray-200"}`}
         disabled={loading}
       >
         {loading
           ? (selectedLanguage === "ko" ? "⏳ 결제 진행 중..." : "⏳ Payment in progress...")
           : (selectedLanguage === "ko"
               ? `🚀 SOL로 결제하기 (${TOKEN_PRICE_SOL.toFixed(6)} SOL/토큰)`
-              : `🚀 Pay with SOL (${TOKEN_PRICE_SOL.toFixed(6)} SOL/token)`)
-        }
+              : `🚀 Pay with SOL (${TOKEN_PRICE_SOL.toFixed(6)} SOL/token)`)}
       </button>
     </div>
   );
