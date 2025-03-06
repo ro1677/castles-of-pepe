@@ -158,7 +158,7 @@ export default function PresaleForm({ selectedLanguage }) {
         {selectedLanguage === "ko" ? "☕ 캣프레소 프리세일" : "☕ Catpresso Presale"}
       </h2>
 
-      {/* ✅ 프리세일 남은 시간 및 판매량 */}
+      {/* 프리세일 남은 시간 및 판매량 */}
       <div className="bg-gray-800 p-3 rounded-lg mb-4 text-center">
         <p className="text-yellow-300">
           📅 {selectedLanguage === "ko" ? "프리세일 남은 시간" : "Presale Remaining Time"}: {remainingTime}
@@ -200,27 +200,25 @@ export default function PresaleForm({ selectedLanguage }) {
         {selectedLanguage === "ko" ? "💳 원화(KRW)로 결제하기" : "💳 Pay in KRW"}
       </button>
 
-      {connected && (
-        <>
-          <p className="text-center text-gray-300 mt-4">
-            1 {selectedLanguage === "ko" ? "토큰 가격" : "Token Price"}: {TOKEN_PRICE_SOL.toFixed(6)} SOL / {TOKEN_PRICE_KRW} KRW
-          </p>
-          <p className="text-center text-gray-300">
-            {selectedLanguage === "ko" ? "총 결제 금액" : "Total Cost"}: {totalCostSOL} SOL / {totalCostKRW} KRW
-          </p>
-          <button
-            onClick={handlePurchase}
-            className={`w-full text-black font-bold py-3 rounded-lg ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-white hover:bg-gray-200"}`}
-            disabled={loading}
-          >
-            {loading
-              ? (selectedLanguage === "ko" ? "⏳ 결제 진행 중..." : "⏳ Payment in progress...")
-              : (selectedLanguage === "ko"
-                  ? `🚀 SOL로 결제하기 (${TOKEN_PRICE_SOL.toFixed(6)} SOL/토큰)`
-                  : `🚀 Pay with SOL (${TOKEN_PRICE_SOL.toFixed(6)} SOL/token)`)}
-          </button>
-        </>
-      )}
+      {/* 항상 노출: 가격 정보 및 결제 버튼 */}
+      <p className="text-center text-gray-300 mt-4">
+        1 {selectedLanguage === "ko" ? "토큰 가격" : "Token Price"}: {TOKEN_PRICE_SOL.toFixed(6)} SOL / {TOKEN_PRICE_KRW} KRW
+      </p>
+      <p className="text-center text-gray-300">
+        {selectedLanguage === "ko" ? "총 결제 금액" : "Total Cost"}: {totalCostSOL} SOL / {totalCostKRW} KRW
+      </p>
+      <button
+        onClick={handlePurchase}
+        className={`w-full text-black font-bold py-3 rounded-lg ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-white hover:bg-gray-200"}`}
+        disabled={loading}
+      >
+        {loading
+          ? (selectedLanguage === "ko" ? "⏳ 결제 진행 중..." : "⏳ Payment in progress...")
+          : (selectedLanguage === "ko"
+              ? `🚀 SOL로 결제하기 (${TOKEN_PRICE_SOL.toFixed(6)} SOL/토큰)`
+              : `🚀 Pay with SOL (${TOKEN_PRICE_SOL.toFixed(6)} SOL/token)`)
+        }
+      </button>
     </div>
   );
 }
