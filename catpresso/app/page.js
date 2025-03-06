@@ -7,8 +7,8 @@ import Navbar from "@/components/Navbar";
 import { useState } from "react";
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState("home"); // 현재 선택된 섹션
-  const [language, setLanguage] = useState("ko"); // 언어 상태 (ko: 한국어, en: 영어)
+  const [activeSection, setActiveSection] = useState("home");
+  const [language, setLanguage] = useState("ko");
 
   // 언어 변경 함수
   const toggleLanguage = () => {
@@ -46,7 +46,7 @@ export default function Home() {
       {/* 네비게이션 바 */}
       <Navbar setActiveSection={setActiveSection} toggleLanguage={toggleLanguage} language={language} />
 
-      {/* 배경 정보 영역 (네비게이션 바와 프리세일 상자 사이) */}
+      {/* 배경 정보 영역 */}
       <BackgroundInfo selectedLanguage={language} />
 
       {/* 선택한 섹션의 내용 */}
@@ -60,12 +60,9 @@ export default function Home() {
 
       {/* 프리세일 구매 및 이미지 섹션 */}
       <div className="flex flex-col md:flex-row h-full mt-4 gap-4 md:gap-6">
-        {/* 왼쪽: 프리세일 구매 UI */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-6 h-full">
           <PresaleForm selectedLanguage={language} />
         </div>
-
-        {/* 오른쪽: 이미지 섹션 */}
         <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-200 p-4 md:p-6 h-full">
           <Image
             src="/images/catpresso.jpg"

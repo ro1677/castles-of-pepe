@@ -10,7 +10,7 @@ export default function Navbar({ setActiveSection, toggleLanguage, language }) {
       <h1 className="text-xl font-bold">Catpresso</h1>
 
       {/* 데스크탑 네비게이션 */}
-      <div className="hidden md:flex space-x-6">
+      <div className="hidden md:flex space-x-6 items-center">
         <button className="hover:text-yellow-300" onClick={() => setActiveSection("home")}>
           {language === "ko" ? "홈" : "Home"}
         </button>
@@ -29,14 +29,13 @@ export default function Navbar({ setActiveSection, toggleLanguage, language }) {
         <button className="hover:text-yellow-300" onClick={() => setActiveSection("staking")}>
           {language === "ko" ? "스테이킹" : "Staking"}
         </button>
+
+        {/* Phantom 지갑 연결 버튼 삽입 */}
+        <WalletConnect />
+
         <button className="bg-gray-700 px-4 py-2 rounded" onClick={toggleLanguage}>
           🌍 {language === "ko" ? "English" : "한국어"}
         </button>
-      </div>
-
-      {/* 오른쪽: Phantom 지갑 연결 버튼 (PC용) */}
-      <div className="hidden md:block">
-        <WalletConnect />
       </div>
 
       {/* 모바일 메뉴 버튼 */}
@@ -49,68 +48,50 @@ export default function Navbar({ setActiveSection, toggleLanguage, language }) {
         <div className="absolute top-16 left-0 w-full bg-black text-white flex flex-col items-center space-y-4 py-4 shadow-lg md:hidden">
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("home");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("home"); setMenuOpen(false); }}
           >
             {language === "ko" ? "홈" : "Home"}
           </button>
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("about");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("about"); setMenuOpen(false); }}
           >
             {language === "ko" ? "소개" : "About"}
           </button>
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("techmap");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("techmap"); setMenuOpen(false); }}
           >
             {language === "ko" ? "테크맵" : "Tech Map"}
           </button>
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("tokenomics");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("tokenomics"); setMenuOpen(false); }}
           >
             {language === "ko" ? "토크노믹스" : "Tokenomics"}
           </button>
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("guide");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("guide"); setMenuOpen(false); }}
           >
             {language === "ko" ? "구매가이드" : "Buy Guide"}
           </button>
           <button
             className="hover:text-yellow-300"
-            onClick={() => {
-              setActiveSection("staking");
-              setMenuOpen(false);
-            }}
+            onClick={() => { setActiveSection("staking"); setMenuOpen(false); }}
           >
             {language === "ko" ? "스테이킹" : "Staking"}
           </button>
+
+          {/* 모바일에서도 Phantom 지갑 연결 버튼 */}
+          <WalletConnect />
+
           <button
             className="bg-gray-700 px-4 py-2 rounded"
-            onClick={() => {
-              toggleLanguage();
-              setMenuOpen(false);
-            }}
+            onClick={() => { toggleLanguage(); setMenuOpen(false); }}
           >
             🌍 {language === "ko" ? "English" : "한국어"}
           </button>
-          <WalletConnect />
         </div>
       )}
     </nav>

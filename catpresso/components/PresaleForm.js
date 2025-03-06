@@ -79,7 +79,9 @@ export default function PresaleForm({ selectedLanguage }) {
   // ✅ 지갑 결제 함수
   const handlePurchase = async () => {
     if (!connected) {
-      await connect();
+      // 지갑이 연결되지 않은 경우, 지갑 선택 창(모달)을 띄워줍니다.
+      setVisible(true);
+      return;
     }
     if (!publicKey) {
       alert(selectedLanguage === "ko" ? "❌ 지갑이 연결되지 않았습니다." : "❌ Wallet is not connected.");
