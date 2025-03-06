@@ -1,0 +1,19 @@
+[toolchain]
+
+[programs.localnet]
+catpresso_presale = "CYwMj3xxShjTzkuXRm216rxg6Y4mDBGVhjABGRipakBK"
+
+[programs.devnet]
+catpresso_presale = "CYwMj3xxShjTzkuXRm216rxg6Y4mDBGVhjABGRipakBK"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+
