@@ -20,22 +20,6 @@ export default function PresaleForm({ selectedLanguage }) {
   // 입력값을 정수로 파싱 (빈 문자열이면 0으로 처리)
   const numericAmount = parseInt(amount) || 0;
 
-  // TossPayments SDK가 로드되었는지 상태 관리 (원화 결제용)
-  const [sdkLoaded, setSdkLoaded] = useState(false);
-
-  // ✅ TossPayments SDK 로드 (이미 로드되어 있지 않으면)
-  useEffect(() => {
-    if (!document.getElementById("tosspayments-sdk")) {
-      const script = document.createElement("script");
-      script.src = "https://js.tosspayments.com/v2/standard";
-      script.id = "tosspayments-sdk";
-      script.onload = () => setSdkLoaded(true);
-      document.body.appendChild(script);
-    } else {
-      setSdkLoaded(true);
-    }
-  }, []);
-
   // ✅ SOL 시세 가져오기 (네트워크 오류 시 기본값 150,000 KRW 사용)
   useEffect(() => {
     async function fetchSolPrice() {
@@ -92,9 +76,10 @@ export default function PresaleForm({ selectedLanguage }) {
   const totalCostSOL = (numericAmount * TOKEN_PRICE_SOL).toFixed(6);
   const totalCostKRW = numericAmount * TOKEN_PRICE_KRW;
 
-  // ✅ 지갑 결제 함수 (SOL로 결제)
+  // ✅ 지갑 결제 함수
   const handlePurchase = async () => {
     if (!connected) {
+      // 지갑이 연결되지 않은 경우, 지갑 선택 창(모달)을 띄워줍니다.
       setVisible(true);
       return;
     }
@@ -133,26 +118,44 @@ export default function PresaleForm({ selectedLanguage }) {
     setLoading(false);
   };
 
-  // ✅ 원화 결제 함수 (TossPayments 위젯 연동)
-  const handleKRWPaymentWidget = () => {
-    if (!sdkLoaded) {
-      console.error("TossPayments SDK is not loaded yet.");
-      return;
-    }
-    // 테스트용 키로 TossPayments 객체 초기화
-    const tossPayments = window.TossPayments("test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm");
-    // 결제 위젯 인스턴스 생성 (비회원의 경우 "ANONYMOUS" 사용)
-    const widget = tossPayments.widgets({ customerKey: "ANONYMOUS" });
-    // 결제 금액 설정 (KRW 단위 결제 금액: totalCostKRW)
-    widget.setAmount(totalCostKRW);
-    // 결제 UI 렌더링: 지정한 DOM 요소에 위젯 UI를 표시
-    widget.renderPaymentMethods("#payment-methods", totalCostKRW)
-      .then(() => {
-        console.log("결제 위젯이 렌더링되었습니다.");
-      })
-      .catch((err) => {
-        console.error("결제 위젯 렌더링 오류:", err);
+  // ✅ 원화 결제 함수
+  const handleKRWPayment = async () => {
+    try {
+      if (!email) {
+        alert(selectedLanguage === "ko" ? "❌ 이메일을 입력해주세요." : "❌ Please enter your email.");
+        return;
+      }
+      const paymentResponse = await fetch("/api/processPayment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, amount: totalCostKRW }),
       });
+      if (!paymentResponse.ok) {
+        throw new Error(`❌ 서버 응답 오류: ${paymentResponse.status}`);
+      }
+      const paymentData = await paymentResponse.json();
+      console.log("✅ 원화 결제 응답:", paymentData);
+      if (!paymentData.success) {
+        alert(
+          selectedLanguage === "ko"
+            ? "❌ 결제 실패: " + paymentData.message
+            : "❌ Payment failed: " + paymentData.message
+        );
+        return;
+      }
+      alert(
+        selectedLanguage === "ko"
+          ? `✅ 원화 결제 완료: ${totalCostKRW} KRW\n구매한 토큰이 ${email} 로 전송됩니다.`
+          : `✅ Payment completed: ${totalCostKRW} KRW\nYour purchased tokens will be sent to ${email}.`
+      );
+    } catch (error) {
+      console.error("🚨 원화 결제 실패:", error);
+      alert(
+        selectedLanguage === "ko"
+          ? `❌ 원화 결제 중 오류 발생: ${error.message}`
+          : `❌ Payment error: ${error.message}`
+      );
+    }
   };
 
   return (
@@ -198,15 +201,14 @@ export default function PresaleForm({ selectedLanguage }) {
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      {/* 원화 결제 버튼: TossPayments 결제 위젯 호출 */}
       <button
-        onClick={handleKRWPaymentWidget}
+        onClick={handleKRWPayment}
         className="w-full bg-green-500 text-white font-bold py-3 mt-4 rounded-lg"
       >
         {selectedLanguage === "ko" ? "💳 원화(KRW)로 결제하기" : "💳 Pay in KRW"}
       </button>
 
-      {/* 항상 노출: 가격 정보 및 SOL 결제 버튼 */}
+      {/* 항상 노출: 가격 정보 및 결제 버튼 */}
       <p className="text-center text-gray-300 mt-4">
         1 {selectedLanguage === "ko" ? "토큰 가격" : "Token Price"}: {TOKEN_PRICE_SOL.toFixed(6)} SOL / {TOKEN_PRICE_KRW} KRW
       </p>
@@ -224,9 +226,6 @@ export default function PresaleForm({ selectedLanguage }) {
               ? `🚀 SOL로 결제하기 (${TOKEN_PRICE_SOL.toFixed(6)} SOL/토큰)`
               : `🚀 Pay with SOL (${TOKEN_PRICE_SOL.toFixed(6)} SOL/token)`)}
       </button>
-
-      {/* TossPayments 결제 위젯 UI가 렌더링될 컨테이너 */}
-      <div id="payment-methods"></div>
     </div>
   );
 }
