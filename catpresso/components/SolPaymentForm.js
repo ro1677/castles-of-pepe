@@ -4,7 +4,7 @@ import { Connection, PublicKey, Transaction, TransactionInstruction } from "@sol
 import { useWallet } from "@solana/wallet-adapter-react";
 import BN from "bn.js";
 
-const NETWORK = "https://api.devnet.solana.com";
+const NETWORK = "https://api.mainnet-beta.solana.com";
 const TOKEN_PRICE_KRW = 5; // 1토큰 = 5원
 
 export default function SolPaymentForm() {
