@@ -3,6 +3,7 @@
 import Image from "next/image";
 import WalletConnect from "@/components/WalletConnect";
 import PresaleForm from "@/components/PresaleForm";
+import BackgroundInfo from "@/components/BackgroundInfo";
 import { useState } from "react";
 
 // ✅ 네비게이션 바 컴포넌트
@@ -84,6 +85,9 @@ export default function Home() {
     <div className="bg-backgroundGray min-h-screen">
       {/* ✅ 네비게이션 바 */}
       <Navbar setActiveSection={setActiveSection} toggleLanguage={toggleLanguage} language={language} />
+
+      {/* ✅ 배경 정보 영역 (네비게이션 바와 프리세일 상자 사이) */}
+      <BackgroundInfo selectedLanguage={language} />
 
       {/* ✅ 메인 콘텐츠: 선택한 섹션의 내용 표시 */}
       <div className="text-center p-6">

@@ -9,7 +9,7 @@ import "@/styles/globals.css"; // ✅ 절대 경로로 설정
 
 export default function RootLayout({ children }) {
     // ✅ Solana Devnet 연결
-    const network = WalletAdapterNetwork.mainnet-beta;
+    const network = WalletAdapterNetwork.MainnetBeta;
     const endpoint = "https://api.mainnet-beta.solana.com";
 
     // ✅ 사용 가능한 지갑 목록
