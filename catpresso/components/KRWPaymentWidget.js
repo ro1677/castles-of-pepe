@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import tossPayments from '@/utils/tossPaymentsClient';
 
-// 이후 tossPayments 객체를 사용하여 widget() 등 필요한 메서드를 호출합니다.
-
 export default function KRWPaymentWidget({ amount }) {
   const [sdkLoaded, setSdkLoaded] = useState(false);
 
@@ -12,6 +10,7 @@ export default function KRWPaymentWidget({ amount }) {
       const script = document.createElement("script");
       script.src = "https://js.tosspayments.com/v2/standard";
       script.id = "tosspayments-sdk";
+      script.crossOrigin = "anonymous"; // crossOrigin 속성 추가
       script.onload = () => setSdkLoaded(true);
       document.body.appendChild(script);
     } else {
@@ -42,8 +41,8 @@ export default function KRWPaymentWidget({ amount }) {
 
   return (
     <div>
-      <button 
-        onClick={handlePayment} 
+      <button
+        onClick={handlePayment}
         className="w-full bg-white text-black font-bold py-3 rounded-lg"
       >
         원화 결제하기
