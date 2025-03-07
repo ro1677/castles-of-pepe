@@ -8,29 +8,21 @@ export default function WalletConnect() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
+  // publicKey가 변경되면 walletAddress를 업데이트
   useEffect(() => {
-    if (window.solana) {
-      const provider = window.solana;
-      if (provider.isPhantom) {
-        provider.connect({ onlyIfTrusted: true })
-          .then((res) => setWalletAddress(res.publicKey.toString()))
-          .catch(() => console.warn("자동 로그인 실패"));
-      }
+    if (publicKey) {
+      setWalletAddress(publicKey.toString());
     }
-  }, []);
+  }, [publicKey]);
 
   const connectWallet = async () => {
     try {
       setErrorMessage(null);
-      if (!window.solana) {
-        throw new Error("❌ Phantom 지갑이 설치되어 있지 않습니다.");
-      }
-
+      // 직접 window.solana를 확인하지 않고, wallet adapter의 connect()를 호출합니다.
       if (!connected) {
-        setVisible(true);
+        setVisible(true); // 지갑 모달 표시
         await connect();
       }
-
       if (publicKey) {
         setWalletAddress(publicKey.toString());
       }

@@ -4,19 +4,21 @@ import { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 
+// 주의: 만약 @solana/wallet-standard 등에서 Phantom이 이미 등록되어 있다면, 
+// 해당 어댑터와 중복되지 않도록 설정(또는 제거)해야 합니다.
 export default function WalletContextProvider({ children }) {
-  // 예: devnet을 사용 중이라면, 혹은 mainnet-beta로 변경 가능
   const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
   const wallets = useMemo(() => [
     new PhantomWalletAdapter({
-      deepLink: "https://phantom.app/ul/wallet", // Phantom 모바일 호출 URL
-      forceMobile: true, // 모바일 환경에서 딥링크를 강제합니다.
+      deepLink: "https://phantom.app/ul/wallet",
+      forceMobile: true,
     })
   ], []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      {/* autoConnect 옵션 제거 → 수동 연결 */}
+      <WalletProvider wallets={wallets}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

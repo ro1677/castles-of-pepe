@@ -1,8 +1,8 @@
 // BackgroundInfo.js
 export default function BackgroundInfo({ selectedLanguage }) {
   return (
-    <div className="py-8">
-      <div className="text-center text-[#A52A2A]">
+    <div className="py-4">
+      <div className="text-center text-black">
         {selectedLanguage === "ko" ? (
           <>
             <h1 className="text-2xl font-bold">= Catpresso Cho-cho-ro 멤버쉽 밈코인</h1>
