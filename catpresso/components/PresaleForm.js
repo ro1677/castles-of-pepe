@@ -174,7 +174,7 @@ export default function PresaleForm({ selectedLanguage }) {
           <span>초</span>
   </div>
      {/* 두 번째 행: 숫자 (글자 크기를 text-xl로, 간격을 space-x-16) */}
-  <div className="flex justify-center space-x-16 text-xl font-bold tracking-wider text-yellow-300 mt-1">
+  <div className="flex justify-center space-x-14 text-xl font-bold tracking-wider text-yellow-300 mt-1">
     <span>{String(timeParts.days).padStart(2, "0")}</span>
     <span>{String(timeParts.hours).padStart(2, "0")}</span>
     <span>{String(timeParts.minutes).padStart(2, "0")}</span>
