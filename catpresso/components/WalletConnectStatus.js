@@ -1,47 +1,18 @@
 // WalletConnectStatus.js
+"use client";
+
 import { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { isWalletConnected } from "@/utils/walletUtils"; // 경로를 실제 프로젝트에 맞게 조정
 
 export default function WalletConnectStatus() {
-  const { publicKey, connected, connect, disconnect } = useWallet();
+  const { publicKey, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [showDisconnect, setShowDisconnect] = useState(false);
 
-  useEffect(() => {
-    if (!connected) {
-      setShowDisconnect(false);
-    }
-  }, [connected]);
-
-  const handleConnect = async () => {
-    console.log("연결 상태:", connected, "publicKey:", publicKey);
-    // 연결 전에 지갑이 선택되었는지 확인 (isWalletConnected 함수 활용)
-    if (!isWalletConnected({ connected, publicKey })) {
-      alert("지갑을 선택해주세요."); // 사용자 안내 메시지
-      return;
-    }
-    try {
-      // 연결되지 않은 경우에만 모달을 띄우고 연결 시도
-      if (!connected) {
-        setVisible(true);
-        await connect();
-      }
-    } catch (error) {
-      if (error.name === "WalletNotSelectedError") {
-        alert("지갑이 선택되지 않았습니다. 지갑을 선택해주세요.");
-      } else if (error.message.includes("User rejected the request")) {
-        alert("지갑 연결이 취소되었습니다.");
-      } else {
-        alert(`지갑 연결 중 오류 발생: ${error.message}`);
-      }
-      console.error("지갑 연결 실패:", error);
-    }
-  };
-
-  const handleToggleDisconnect = () => {
-    setShowDisconnect((prev) => !prev);
+  const handleConnect = () => {
+    // 모달만 열고 사용자가 선택하도록 합니다.
+    setVisible(true);
   };
 
   const handleDisconnect = async () => {
@@ -49,36 +20,31 @@ export default function WalletConnectStatus() {
       await disconnect();
       setShowDisconnect(false);
     } catch (error) {
-      alert(`지갑 연결 해제 중 오류 발생: ${error.message}`);
-      console.error("지갑 연결 해제 오류:", error);
+      alert(`지갑 연결 해제 오류: ${error.message}`);
     }
   };
 
-  if (!connected) {
-    return (
-      <button
-        onClick={handleConnect}
-        className="bg-blue-500 px-3 py-1 rounded text-xs"
-      >
-        Phantom 지갑 연결하기
-      </button>
-    );
-  }
-
-  return (
+  return !connected ? (
+    <button
+      onClick={handleConnect}
+      className="bg-blue-500 px-3 py-1 rounded text-xs"
+    >
+      지갑 연결하기
+    </button>
+  ) : (
     <div className="relative inline-block">
       <button
-        onClick={handleToggleDisconnect}
+        onClick={() => setShowDisconnect((prev) => !prev)}
         className="bg-green-500 px-3 py-1 rounded text-xs"
       >
-        지갑 연결됨
+        지갑 연결됨 ({publicKey.toString().slice(0, 4)}...)
       </button>
       {showDisconnect && (
         <button
-          onClick={handleDisconnect}
+          onClick={disconnect}
           className="absolute left-0 mt-1 bg-red-500 px-3 py-1 rounded text-xs"
         >
-          지갑 연결 해제하기
+          연결 해제
         </button>
       )}
     </div>

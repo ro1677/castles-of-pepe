@@ -1,30 +1,35 @@
-"use client"; // 클라이언트 컴포넌트로 설정
+// app/layout.js
+"use client";
 
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import React, { useMemo } from "react";
-import "@/styles/globals.css"; // ✅ 절대 경로로 설정
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { clusterApiUrl } from "@solana/web3.js";
+import "@solana/wallet-adapter-react-ui/styles.css";
+import "@/styles/globals.css";
 
 export default function RootLayout({ children }) {
-    // ✅ Solana Devnet 연결
-    const network = WalletAdapterNetwork.MainnetBeta;
-    const endpoint = "https://api.mainnet-beta.solana.com";
+  const endpoint = React.useMemo(() => clusterApiUrl("devnet"), []);
 
-    // ✅ 사용 가능한 지갑 목록
-    const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  const wallets = React.useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter({ network: "devnet" }),
+    ],
+    []
+  );
 
-    return (
-        <html lang="ko">
-            <body>
-                <ConnectionProvider endpoint={endpoint}>
-                    <WalletProvider wallets={wallets} autoConnect>
-                        <WalletModalProvider>{children}</WalletModalProvider>
-                    </WalletProvider>
-                </ConnectionProvider>
-            </body>
-        </html>
-    );
+  return (
+    <html lang="ko">
+      <body>
+        <ConnectionProvider endpoint={endpoint}>
+          <WalletProvider wallets={wallets} autoConnect={false}>
+            <WalletModalProvider>{children}</WalletModalProvider>
+          </WalletProvider>
+        </ConnectionProvider>
+      </body>
+    </html>
+  );
 }
 
