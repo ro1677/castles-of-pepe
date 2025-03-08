@@ -70,6 +70,7 @@ export default function Home() {
             width={600}
             height={600}
             unoptimized
+            priority  // 이 속성을 추가합니다.
             className="max-w-xs md:max-w-lg w-full h-auto object-contain"
           />
         </div>

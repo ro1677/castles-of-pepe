@@ -15,9 +15,11 @@ export default function WalletConnectStatus() {
   }, [connected]);
 
   const handleConnect = async () => {
+    console.log("연결 상태:", connected, "publicKey:", publicKey);
     try {
+      // 만약 아직 연결되지 않았다면 바로 연결 시도를 진행합니다.
       if (!connected) {
-        setVisible(true);
+        setVisible(true); // 지갑 모달을 띄워 사용자가 지갑을 선택하게 함
         await connect();
       }
     } catch (error) {

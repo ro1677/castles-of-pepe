@@ -1,11 +1,10 @@
+// PresaleForm.js
 import { useState, useEffect } from "react";
 import { getSolPrice } from "../utils/getSolPrice";
 import { purchasePresaleToken, getWalletBalance } from "../utils/solanaTransaction";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
-// 고정된 프리세일 종료 시간 (예시: 2025년 4월 10일 23:59:59 UTC)
-// 실제 종료 시간에 맞게 수정하세요.
 const PRESALE_END_TIME = new Date("2025-04-10T23:59:59Z");
 
 export default function PresaleForm({ selectedLanguage }) {
@@ -14,7 +13,6 @@ export default function PresaleForm({ selectedLanguage }) {
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  // timeParts 상태: { days, hours, minutes, seconds }
   const [timeParts, setTimeParts] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [salesData, setSalesData] = useState({ current: 0, goal: 1000000000 });
 
@@ -23,15 +21,23 @@ export default function PresaleForm({ selectedLanguage }) {
 
   const numericAmount = parseInt(amount) || 0;
 
-  // TossPayments SDK 로드 상태 (원화 결제용)
+  // TossPayments SDK를 로드할 때는 로컬 프록시를 사용합니다.
   const [sdkLoaded, setSdkLoaded] = useState(false);
   useEffect(() => {
     if (!document.getElementById("tosspayments-sdk")) {
       const script = document.createElement("script");
-      script.src = "https://js.tosspayments.com/v2/standard";
+      // 프록시 API 엔드포인트 사용: CORS 문제 해결
+      script.src = '/api/toss-payments-sdk?v=1';
       script.id = "tosspayments-sdk";
-      script.crossOrigin = "anonymous"; // crossOrigin 속성 추가
-      script.onload = () => setSdkLoaded(true);
+      script.crossOrigin = "anonymous";
+      script.onload = () => {
+        console.log("Toss Payments SDK loaded successfully.");
+        setSdkLoaded(true);
+      };
+      script.onerror = (error) => {
+        console.error("Failed to load Toss Payments SDK:", error);
+        setSdkLoaded(false);
+      };
       document.body.appendChild(script);
     } else {
       setSdkLoaded(true);
@@ -66,7 +72,6 @@ export default function PresaleForm({ selectedLanguage }) {
     fetchBalance();
   }, [publicKey]);
 
-  // 프리세일 남은 시간 업데이트 (고정 종료 시간 기준)
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -143,7 +148,6 @@ export default function PresaleForm({ selectedLanguage }) {
       return;
     }
     const tossPayments = window.TossPayments("test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm");
-    // 최신 API에 따라 widgets() 메서드를 사용
     const widget = tossPayments.widgets({ customerKey: "ANONYMOUS" });
     widget.setAmount({ currency: "KRW", value: totalCostKRW });
     widget.renderPaymentMethods({ selector: "#payment-methods", variantKey: "DEFAULT" })
@@ -165,22 +169,20 @@ export default function PresaleForm({ selectedLanguage }) {
       <p className="text-center text-xs text-gray-400 mb-2">[종료까지 남은시간]</p>
 
       {/* 프리세일 남은 시간 박스 */}
-    <div className="bg-gray-800 p-2 rounded-lg mb-4 text-center">
-      {/* 첫 번째 행: 라벨 (글자 크기를 text-xl로, 간격을 space-x-16, 오프셋 적용) */}
-  <div className="flex justify-center space-x-16 text-xl text-yellow-300">
+      <div className="bg-gray-800 p-2 rounded-lg mb-4 text-center">
+        <div className="flex justify-center space-x-16 text-xl text-yellow-300">
           <span>일</span>
           <span>시</span>
           <span>분</span>
           <span>초</span>
-  </div>
-     {/* 두 번째 행: 숫자 (글자 크기를 text-xl로, 간격을 space-x-16) */}
-  <div className="flex justify-center space-x-14 text-xl font-bold tracking-wider text-yellow-300 mt-1">
-    <span>{String(timeParts.days).padStart(2, "0")}</span>
-    <span>{String(timeParts.hours).padStart(2, "0")}</span>
-    <span>{String(timeParts.minutes).padStart(2, "0")}</span>
-    <span>{String(timeParts.seconds).padStart(2, "0")}</span>
-  </div>
-</div>
+        </div>
+        <div className="flex justify-center space-x-14 text-xl font-bold tracking-wider text-yellow-300 mt-1">
+          <span>{String(timeParts.days).padStart(2, "0")}</span>
+          <span>{String(timeParts.hours).padStart(2, "0")}</span>
+          <span>{String(timeParts.minutes).padStart(2, "0")}</span>
+          <span>{String(timeParts.seconds).padStart(2, "0")}</span>
+        </div>
+      </div>
 
       {/* 목표 판매토큰 정보 */}
       <p className="text-center text-white mb-4">
@@ -215,7 +217,6 @@ export default function PresaleForm({ selectedLanguage }) {
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      {/* 총 결제 금액 정보 */}
       <p className="text-center text-gray-300 mt-4">
         1 {selectedLanguage === "ko" ? "토큰 가격" : "Token Price"}: {TOKEN_PRICE_SOL.toFixed(6)} SOL / {TOKEN_PRICE_KRW} KRW
       </p>
@@ -223,7 +224,6 @@ export default function PresaleForm({ selectedLanguage }) {
         {selectedLanguage === "ko" ? "총 결제 금액" : "Total Cost"}: {totalCostSOL} SOL / {totalCostKRW} KRW
       </p>
 
-      {/* 두 개의 결제 버튼을 가로로 배치 */}
       <div className="flex space-x-4 mt-4">
         <button
           onClick={handleKRWPayment}
@@ -244,7 +244,6 @@ export default function PresaleForm({ selectedLanguage }) {
         </button>
       </div>
 
-      {/* TossPayments 결제 위젯 UI 컨테이너 */}
       <div id="payment-methods"></div>
     </div>
   );

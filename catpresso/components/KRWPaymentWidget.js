@@ -4,9 +4,23 @@ import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 export default function KRWPaymentWidget({ amount, email, selectedLanguage, totalCostKRW }) {
   const [sdkLoaded, setSdkLoaded] = useState(false);
 
-  // loadTossPayments를 사용하므로, 별도의 스크립트 로드는 생략하고 sdkLoaded를 바로 true로 설정
+  // TossPayments SDK를 동적으로 로드하고 에러 핸들링 추가
   useEffect(() => {
-    setSdkLoaded(true);
+    const existingScript = document.getElementById("tosspayments-sdk");
+    if (existingScript) {
+      setSdkLoaded(true);
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://js.tosspayments.com/v2/standard";
+      script.id = "tosspayments-sdk";
+      script.crossOrigin = "anonymous";
+      script.onload = () => setSdkLoaded(true);
+      script.onerror = (error) => {
+        console.error("Failed to load Toss Payments SDK:", error);
+        setSdkLoaded(false);
+      };
+      document.body.appendChild(script);
+    }
   }, []);
 
   const handleKRWPayment = async () => {
