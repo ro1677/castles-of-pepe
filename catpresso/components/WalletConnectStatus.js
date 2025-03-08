@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { isWalletConnected } from "@/utils/walletUtils"; // 경로는 실제 프로젝트 구조에 맞게 조정
 
 export default function WalletConnectStatus() {
   const { publicKey, connected, connect, disconnect } = useWallet();
@@ -16,10 +17,14 @@ export default function WalletConnectStatus() {
 
   const handleConnect = async () => {
     console.log("연결 상태:", connected, "publicKey:", publicKey);
+    // isWalletConnected를 사용하여 연결 상태를 먼저 확인
+    if (!isWalletConnected({ connected, publicKey })) {
+      alert("지갑을 선택해주세요.");
+      return;
+    }
     try {
-      // 만약 아직 연결되지 않았다면 바로 연결 시도를 진행합니다.
       if (!connected) {
-        setVisible(true); // 지갑 모달을 띄워 사용자가 지갑을 선택하게 함
+        setVisible(true); // 지갑 모달 표시
         await connect();
       }
     } catch (error) {
