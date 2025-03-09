@@ -7,17 +7,17 @@ export default function WalletConnectStatus() {
   const { setVisible } = useWalletModal();
   const [loading, setLoading] = useState(false);
 
-  const connectMobileWallet = () => {
-    const appUrl = encodeURIComponent('https://www.catpresso.com');
-    const redirectLink = encodeURIComponent('https://www.catpresso.com/wallet');
-    const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${appUrl}&redirect_link=${redirectLink}`;
+const connectMobileWallet = () => {
+  const appUrl = encodeURIComponent('https://www.catpresso.com');
+  const redirectLink = encodeURIComponent('https://www.catpresso.com/wallet');
+  const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${appUrl}&redirect_link=${redirectLink}`;
 
-    const a = document.createElement('a');
-    a.href = phantomDeepLink;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+  const a = document.createElement('a');
+  a.href = phantomDeepLink;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
 
   const handleConnect = () => {
     setLoading(true);
