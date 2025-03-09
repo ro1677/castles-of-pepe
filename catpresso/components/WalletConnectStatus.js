@@ -9,14 +9,17 @@ export default function WalletConnectStatus() {
   const [errorMessage, setErrorMessage] = useState("");
 
   // ✅ Phantom 모바일 딥링크 연결 함수
-  const connectMobileWallet = () => {
-    const dappUrl = encodeURIComponent("https://www.catpresso.com");
-    const redirectUrl = encodeURIComponent("https://www.catpresso.com/wallet");
-    const phantomUrl = `https://phantom.app/ul/v1/connect?app_url=${dappUrl}&redirect_link=${redirectUrl}`;
+const connectMobileWallet = () => {
+  const dappUrl = encodeURIComponent("https://www.catpresso.com");
+  const redirectUrl = encodeURIComponent("https://www.catpresso.com/wallet");
+  const phantomUrl = `https://phantom.app/ul/v1/connect?app_url=${dappUrl}&redirect_link=${redirectUrl}`;
 
-    console.log("📱 Phantom 딥링크 실행:", phantomUrl);
-    window.location.href = phantomUrl; // ✅ Phantom 앱 실행
-  };
+  const aTag = document.createElement('a');
+  aTag.setAttribute('href', phantomUrl);
+  document.body.appendChild(aTag);
+  aTag.click();
+  document.body.removeChild(aTag);
+};
 
   // ✅ 데스크톱 & 모바일 구분 후 연결 실행
   const connectWallet = async () => {
