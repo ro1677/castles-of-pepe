@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
 
 export default function WalletConnectStatus() {
   const { publicKey, connected, connect, disconnect, select } = useWallet();
@@ -10,9 +12,17 @@ export default function WalletConnectStatus() {
 
   // ✅ Phantom 모바일 딥링크 연결 함수
   const connectMobileWallet = () => {
+    if (!window.solana || !window.solana.isPhantom) {
+      alert("Phantom Wallet이 설치되지 않았습니다. 앱을 설치 후 다시 시도하세요.");
+      window.open("https://phantom.app/", "_blank"); // Phantom 설치 페이지로 이동
+      return;
+    }
+
+    const dappKeyPair = nacl.box.keyPair(); // ✅ DApp 공개 키 생성
     const dappUrl = encodeURIComponent("https://www.catpresso.com");
     const redirectUrl = encodeURIComponent("https://www.catpresso.com/wallet");
-    const phantomUrl = `https://phantom.app/ul/v1/connect?app_url=${dappUrl}&redirect_link=${redirectUrl}`;
+
+    const phantomUrl = `https://phantom.app/ul/v1/connect?dapp_encryption_public_key=${bs58.encode(dappKeyPair.publicKey)}&cluster=mainnet-beta&app_url=${dappUrl}&redirect_link=${redirectUrl}`;
 
     console.log("📱 Phantom 딥링크 실행:", phantomUrl);
     window.location.href = phantomUrl; // ✅ Phantom 앱 실행
