@@ -1,24 +1,32 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useState } from "react";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
 
 export default function WalletConnectStatus() {
   const { publicKey, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [loading, setLoading] = useState(false);
 
-const connectMobileWallet = () => {
-  const appUrl = encodeURIComponent('https://www.catpresso.com');
-  const redirectLink = encodeURIComponent('https://www.catpresso.com/wallet');
-  const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${appUrl}&redirect_link=${redirectLink}`;
+  // ✅ Phantom 모바일 딥링크 연결 함수
+  const connectMobileWallet = () => {
+    const dappKeyPair = nacl.box.keyPair(); // 🔹 DApp 공개 키 생성
+    const dappPublicKey = bs58.encode(dappKeyPair.publicKey); // 🔹 Base58로 인코딩
 
-  const a = document.createElement('a');
-  a.href = phantomDeepLink;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
+    const appUrl = encodeURIComponent("https://www.catpresso.com");
+    const redirectLink = encodeURIComponent("https://www.catpresso.com/wallet");
 
+    // ✅ 올바른 Phantom 딥링크 URL
+    const phantomDeepLink = `https://phantom.app/ul/v1/connect?dapp_encryption_public_key=${dappPublicKey}&cluster=mainnet-beta&app_url=${appUrl}&redirect_link=${redirectLink}`;
+
+    console.log("📱 Phantom 딥링크 실행:", phantomDeepLink);
+
+    // ✅ Phantom 앱 실행
+    window.location.href = phantomDeepLink;
+  };
+
+  // ✅ 데스크톱 & 모바일 구분 후 연결 실행
   const handleConnect = () => {
     setLoading(true);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
