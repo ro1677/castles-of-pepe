@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
   const endpoint = useMemo(() => clusterApiUrl("mainnet-beta"), []);
 
   // ✅ 자동 감지 방식으로 변경 (수동 등록 제거)
-  const wallets = useMemo(() => [], []);  
+  const wallets = useMemo(() => [], []);
 
   return (
     <html lang="ko">
