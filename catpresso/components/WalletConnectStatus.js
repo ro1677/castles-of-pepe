@@ -13,22 +13,28 @@ export default function WalletConnectStatus() {
   const connectMobileWallet = () => {
     try {
       // 🔹 Phantom이 요구하는 DApp 공개 키 생성
-      const dappKeyPair = nacl.box.keyPair(); 
+      const dappKeyPair = nacl.box.keyPair();
       const dappPublicKey = bs58.encode(dappKeyPair.publicKey);
 
       const appUrl = encodeURIComponent("https://www.catpresso.com");
+      const redirectLink = encodeURIComponent("https://www.catpresso.com/wallet"); // 웹사이트로 리디렉션
 
-      // ✅ Universal Link 지원 가능 여부에 따라 선택
-      const redirectLink = encodeURIComponent("myapp://onPhantomConnected"); // 앱 딥링크
-      // const redirectLink = encodeURIComponent("https://www.catpresso.com/wallet"); // 웹 리디렉션
-
-      // ✅ 올바른 Phantom 딥링크 URL 적용 (phantom.app 사용)
       const phantomDeepLink = `https://phantom.app/ul/v1/connect?dapp_encryption_public_key=${dappPublicKey}&cluster=mainnet-beta&app_url=${appUrl}&redirect_link=${redirectLink}`;
 
       console.log("📱 Phantom 딥링크 실행:", phantomDeepLink);
 
-      // ✅ Phantom 앱 실행
-      window.location.href = phantomDeepLink;
+      // ✅ 사용자가 버튼을 클릭하면 Phantom 앱 실행
+      const link = document.createElement('a');
+      link.href = phantomDeepLink;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 앱이 없는 경우 대비 설치 페이지 안내 (3초 후)
+      setTimeout(() => {
+        window.location.href = "https://phantom.app/download";
+      }, 3000);
+
     } catch (error) {
       console.error("❌ Phantom 연결 오류:", error);
     }
