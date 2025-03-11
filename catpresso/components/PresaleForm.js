@@ -15,18 +15,19 @@ export default function PresaleForm({ selectedLanguage }) {
   const [email, setEmail] = useState("");
   const [timeParts, setTimeParts] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [salesData, setSalesData] = useState({ current: 0, goal: 1000000000 });
+  const [solPaid, setSolPaid] = useState(false); // ✅ 결제 여부 저장
+  const [txHash, setTxHash] = useState(null);   // ✅ 트랜잭션 해시 저장
 
-  const { publicKey, connected, connect, signTransaction } = useWallet();
+  const { publicKey, connected, signTransaction } = useWallet();
   const { setVisible } = useWalletModal();
 
   const numericAmount = parseInt(amount) || 0;
 
-  // TossPayments SDK를 로드할 때는 로컬 프록시를 사용합니다.
+  // TossPayments SDK 로드 (CORS 문제 해결을 위한 로컬 프록시 사용)
   const [sdkLoaded, setSdkLoaded] = useState(false);
   useEffect(() => {
     if (!document.getElementById("tosspayments-sdk")) {
       const script = document.createElement("script");
-      // 프록시 API 엔드포인트 사용: CORS 문제 해결
       script.src = '/api/toss-payments-sdk?v=1';
       script.id = "tosspayments-sdk";
       script.crossOrigin = "anonymous";
@@ -103,11 +104,11 @@ export default function PresaleForm({ selectedLanguage }) {
       return;
     }
     if (!publicKey) {
-      alert(selectedLanguage === "ko" ? "❌ 지갑이 연결되지 않았습니다." : "❌ Wallet is not connected.");
+      alert("❌ 지갑이 연결되지 않았습니다.");
       return;
     }
     if (numericAmount <= 0) {
-      alert(selectedLanguage === "ko" ? "❌ 구매할 토큰 수량을 올바르게 입력하세요." : "❌ Please enter a valid token amount.");
+      alert("❌ 구매할 토큰 수량을 입력하세요.");
       return;
     }
     if (balance < parseFloat(totalCostSOL)) {
@@ -120,19 +121,13 @@ export default function PresaleForm({ selectedLanguage }) {
     }
     setLoading(true);
     try {
+      // ✅ 트랜잭션을 최신 블록 해시로 생성하여 사용자가 직접 서명하도록 purchasePresaleToken 호출
       const txHash = await purchasePresaleToken({ publicKey, signTransaction }, numericAmount, TOKEN_PRICE_SOL);
-      alert(
-        selectedLanguage === "ko"
-          ? `✅ 프리세일 구매 완료! 트랜잭션 해시: ${txHash}`
-          : `✅ Presale purchase completed! Transaction hash: ${txHash}`
-      );
+      
+      alert(`✅ 프리세일 구매 완료! 트랜잭션 해시: ${txHash}`);
     } catch (error) {
-      console.error("Error during SOL purchase:", error);
-      alert(
-        selectedLanguage === "ko"
-          ? `❌ 구매 중 오류 발생: ${error.message}`
-          : `❌ Purchase error: ${error.message}`
-      );
+      console.error("결제 오류:", error);
+      alert(`❌ 결제 오류 발생: ${error.message}`);
     }
     setLoading(false);
   };
@@ -162,7 +157,7 @@ export default function PresaleForm({ selectedLanguage }) {
   return (
     <>
       <div className="relative overflow-hidden p-8 bg-black text-white shadow-lg rounded-lg max-w-lg mx-auto w-full">
-        {/* 박스 최상단에 고정된 애니메이션 문장 */}
+        {/* 최상단 애니메이션 텍스트 */}
         <p
           className="absolute top-0 left-0 w-full slide-text text-center text-xs text-gray-400"
           style={{ height: "2rem", lineHeight: "2rem" }}
@@ -170,16 +165,13 @@ export default function PresaleForm({ selectedLanguage }) {
           * 지갑이 없으신 경우, 수량과 이메일 입력 후, 원화 구매 버튼을 누르십시오. 토큰이 이메일 주소로 발송됩니다.
         </p>
 
-        {/* 나머지 콘텐츠는 애니메이션 텍스트와 겹치지 않도록 충분한 상단 여백을 줍니다 */}
         <div className="pt-10">
           <h2 className="text-2xl font-bold mb-2 text-center">
             {selectedLanguage === "ko" ? "☕ 캣프레소 프리세일" : "☕ Catpresso Presale"}
           </h2>
 
-          {/* 헤딩과 남은 시간 박스 사이에 작은 설명 텍스트 */}
           <p className="text-center text-xs text-gray-400 mb-2">[종료까지 남은시간]</p>
 
-          {/* 프리세일 남은 시간 박스 */}
           <div className="bg-gray-800 p-2 rounded-lg mb-4 text-center">
             <div className="flex justify-center space-x-16 text-xl text-yellow-300">
               <span>일</span>
@@ -195,12 +187,11 @@ export default function PresaleForm({ selectedLanguage }) {
             </div>
           </div>
 
-          {/* 목표 판매토큰 정보 */}
           <p className="text-center text-white mb-4">
-            {selectedLanguage === "ko" ? "🎯 목표 판매토큰" : "🎯 Target Sale"}: {salesData.current.toLocaleString()} / {salesData.goal.toLocaleString()} {selectedLanguage === "ko" ? "(CATP)" : "(CATP)"}
+            {selectedLanguage === "ko" ? "🎯 목표 판매토큰" : "🎯 Target Sale"}: {salesData.current.toLocaleString()} / {salesData.goal.toLocaleString()} (CATP)
           </p>
 
-          {/* 숨김 처리: 현재 SOL 시세 및 내 잔액 */}
+          {/* SOL 시세 및 잔액(숨김 처리) */}
           <div className="hidden">
             <p className="text-center text-gray-300 mb-4">
               {selectedLanguage === "ko" ? "현재 SOL 시세" : "Current SOL Price"}:{" "}
@@ -256,8 +247,24 @@ export default function PresaleForm({ selectedLanguage }) {
           </div>
 
           <div id="payment-methods"></div>
+
+          {/* ✅ SOL 결제 성공 시 토큰 지급 버튼 렌더링 */}
+          {solPaid && (
+            <div className="mt-4">
+              <button
+                onClick={() => {
+                  // 토큰 지급 처리 로직 추가 (예시)
+                  alert(selectedLanguage === "ko" ? "토큰이 지급되었습니다!" : "Tokens have been issued!");
+                }}
+                className="w-full bg-purple-500 text-white font-bold py-3 rounded-lg"
+              >
+                {selectedLanguage === "ko" ? "토큰 지급받기" : "Claim Tokens"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
       {/* CSS 인라인 스타일로 애니메이션 정의 */}
       <style jsx>{`
         @keyframes slideLeft {
